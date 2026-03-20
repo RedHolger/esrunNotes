@@ -21,7 +21,17 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npm run build
+# Add environment variables needed for build
+ARG NODE_ENV=production
+ENV NODE_ENV=production
+
+# Debug: Check what's in the directory
+RUN ls -la
+RUN npm --version
+RUN node --version
+
+# Run build with verbose output
+RUN npm run build -- --verbose
 
 # Production image, copy all the files and run next
 FROM base AS runner
