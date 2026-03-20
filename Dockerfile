@@ -16,6 +16,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Install FFmpeg for build
+RUN apk add --no-cache ffmpeg
+
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
@@ -25,13 +28,8 @@ COPY . .
 ARG NODE_ENV=production
 ENV NODE_ENV=production
 
-# Debug: Check what's in the directory
-RUN ls -la
-RUN npm --version
-RUN node --version
-
-# Run build with verbose output
-RUN npm run build -- --verbose
+# Run build
+RUN npm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
