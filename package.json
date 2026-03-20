@@ -1,0 +1,45 @@
+{
+  "name": "nursenotes-clone",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest run",
+    "import:json": "node scripts/import-json-to-pg.js"
+  },
+  "dependencies": {
+    "@auth0/nextjs-auth0": "^3.6.0",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@google/genai": "^1.46.0",
+    "@mistralai/mistralai": "^2.0.0",
+    "@types/nodemailer": "^7.0.11",
+    "assemblyai": "^4.28.0",
+    "dotenv": "^16.6.1",
+    "fluent-ffmpeg": "^2.1.3",
+    "lucide-react": "^0.577.0",
+    "next": "^14.2.35",
+    "nodemailer": "^8.0.3",
+    "openai": "^6.32.0",
+    "pg": "^8.11.5",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-markdown": "^10.1.0",
+    "twilio": "^5.13.0"
+  },
+  "devDependencies": {
+    "@types/fluent-ffmpeg": "^2.1.28",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.19",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "16.2.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5",
+    "vitest": "^1.3.1"
+  }
+}
