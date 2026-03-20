@@ -6,11 +6,19 @@ import StudyGuide from "../../components/StudyGuide";
 
 export default function TranscriptionPage({ analysis }: { analysis?: any }) {
 
+  // Default empty analysis to prevent build errors
+  const defaultAnalysis = {
+    summary: "",
+    clinicalConcepts: [],
+    studyGuide: ""
+  };
+  
+  const safeAnalysis = analysis || defaultAnalysis;
 
   const tabs = [
-    { name: 'Summary', content: <LectureSummary summary={analysis.summary} /> },
-    { name: 'Clinical Concepts', content: <ClinicalConcepts concepts={analysis.clinicalConcepts} /> },
-    { name: 'Study Guide', content: <StudyGuide guide={analysis.studyGuide} /> },
+    { name: 'Summary', content: <LectureSummary summary={safeAnalysis.summary} /> },
+    { name: 'Clinical Concepts', content: <ClinicalConcepts concepts={safeAnalysis.clinicalConcepts} /> },
+    { name: 'Study Guide', content: <StudyGuide guide={safeAnalysis.studyGuide} /> },
   ];
 
   const handleAction = async (action: string) => {
@@ -31,7 +39,7 @@ export default function TranscriptionPage({ analysis }: { analysis?: any }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ actions: [action], analysis, email, whatsapp }),
+        body: JSON.stringify({ actions: [action], analysis: safeAnalysis, email, whatsapp }),
       });
       alert(`${action.charAt(0).toUpperCase() + action.slice(1)} sent successfully!`);
     } catch (error) {
