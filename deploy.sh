@@ -3,12 +3,17 @@
 # Deployment script for NurseNotes application
 # Usage: ./deploy.sh [staging|production]
 
+set -euo pipefail
+
 ENVIRONMENT=${1:-production}
 APP_NAME="nursenotes"
 DOCKER_REGISTRY="ghcr.io"
-REPO_NAME="${DOCKER_REGISTRY}/$(git config remote.origin.url | sed 's/.*\/\([^\/]*\)\.git/\1/')"
+REPO_OWNER="$(git config --get remote.origin.url | sed -E 's#.*[:/]([^/]+)/([^/]+)\.git#\1#' | tr '[:upper:]' '[:lower:]')"
+REPO_NAME_ONLY="$(git config --get remote.origin.url | sed -E 's#.*[:/]([^/]+)/([^/]+)\.git#\2#' | tr '[:upper:]' '[:lower:]')"
+REPO_NAME="${DOCKER_REGISTRY}/${REPO_OWNER}/${REPO_NAME_ONLY}"
 
 echo "Deploying to $ENVIRONMENT environment..."
+echo "Using image: $REPO_NAME:latest"
 
 # Pull latest image
 echo "Pulling latest Docker image..."
@@ -20,7 +25,7 @@ docker-compose down
 
 # Start new containers
 echo "Starting new containers..."
-NODE_ENV=production docker-compose up -d
+IMAGE_NAME="$REPO_NAME:latest" NODE_ENV=production docker-compose up -d
 
 # Wait for application to be healthy
 echo "Waiting for application to be ready..."
