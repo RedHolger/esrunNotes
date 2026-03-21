@@ -23,20 +23,26 @@ const gemini = new GoogleGenAI({
 // to ensure it picks up the latest env var correctly if the server just restarted.
 
 // Configure your email transporter
-// IMPORTANT: Replace with your actual email service provider's details
+// IMPORTANT: Configure with your actual email service provider's details
 const transporter = nodemailer.createTransport({
-  host: 'smtp.ethereal.email',
-  port: 587,
-  secure: false, // true for 465, false for other ports
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.EMAIL_PORT || '587'),
+  secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
   auth: {
-    user: process.env.ETHEREAL_USER || 'YOUR_ETHEREAL_USER', // generated ethereal user
-    pass: process.env.ETHEREAL_PASSWORD || 'YOUR_ETHEREAL_PASSWORD', // generated ethereal password
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
 // Configure your Twilio client
 // IMPORTANT: Replace with your actual Twilio credentials
 const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) : null;
+
+// Configure free SMS provider (TextBelt)
+const SMS_PROVIDER = process.env.SMS_PROVIDER || 'twilio'; // 'twilio', 'textbelt', 'vonage'
+
+// Configure WhatsApp provider
+const WHATSAPP_PROVIDER = process.env.WHATSAPP_PROVIDER || 'twilio'; // 'twilio', 'maytapi'
 
 async function getCompletion(prompt: string, provider: 'gemini' | 'openai' | 'mistral' = 'gemini') {
   try {
@@ -152,97 +158,273 @@ async function generateStudyGuide(transcript: string, provider: 'gemini' | 'open
 }
 
 async function sendEmail(to: string, analysis: any) {
-  let html = '<h1>Your Lecture Analysis is Ready!</h1>';
-  if (analysis.summary) {
-    html += `<h2>Summary</h2><p>${analysis.summary}</p>`;
-  }
-  if (analysis.clinicalConcepts) {
-    html += '<h2>Clinical Concepts</h2>';
-    analysis.clinicalConcepts.forEach((concept: any) => {
-      html += `<h3>${concept.name}</h3><p>${concept.definition}</p>`;
-    });
-  }
-  if (analysis.studyGuide) {
-    html += '<h2>Study Guide</h2>';
-    html += '<h3>Questions</h3>';
-    analysis.studyGuide.questions.forEach((q: any) => {
-      html += `<p><b>Q:</b> ${q.question}</p><p><b>A:</b> ${q.answer}</p>`;
-    });
-    html += '<h3>Key Terms</h3>';
-    analysis.studyGuide.keyTerms.forEach((term: any) => {
-      html += `<p><b>${term.term}:</b> ${term.definition}</p>`;
-    });
-  }
+  try {
+    // Debug: Log environment variables (without sensitive data)
+    console.log('Email configuration check:');
+    console.log('EMAIL_USER:', process.env.EMAIL_USER ? '***' + process.env.EMAIL_USER.slice(-10) : 'undefined');
+    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***' + process.env.EMAIL_PASS.slice(-4) : 'undefined');
+    console.log('EMAIL_HOST:', process.env.EMAIL_HOST || 'undefined');
+    
+    // Check if email is configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('Email credentials not configured');
+      throw new Error('Email service not configured');
+    }
 
-  await transporter.sendMail({
-    from: '"NurseNotes" <noreply@nursenotes.com>',
-    to,
-    subject: 'Your Lecture Analysis',
-    html,
-  });
+    let html = '<h1>Your Lecture Analysis is Ready!</h1>';
+    if (analysis.summary) {
+      html += `<h2>Summary</h2><p>${analysis.summary}</p>`;
+    }
+    if (analysis.clinicalConcepts) {
+      html += '<h2>Clinical Concepts</h2>';
+      analysis.clinicalConcepts.forEach((concept: any) => {
+        html += `<h3>${concept.name}</h3><p>${concept.definition}</p>`;
+      });
+    }
+    if (analysis.studyGuide) {
+      html += '<h2>Study Guide</h2>';
+      html += '<h3>Questions</h3>';
+      analysis.studyGuide.questions.forEach((q: any) => {
+        html += `<p><b>Q:</b> ${q.question}</p><p><b>A:</b> ${q.answer}</p>`;
+      });
+      html += '<h3>Key Terms</h3>';
+      analysis.studyGuide.keyTerms.forEach((term: any) => {
+        html += `<p><b>${term.term}:</b> ${term.definition}</p>`;
+      });
+    }
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || '"NurseNotes" <noreply@nursenotes.com>',
+      to,
+      subject: 'Your Lecture Analysis',
+      html,
+    });
+    console.log('Email sent successfully to:', to);
+  } catch (error) {
+    console.error('Failed to send email:', error);
+    throw error;
+  }
+}
+
+async function sendFreeSMS(to: string, message: string) {
+  try {
+    if (SMS_PROVIDER === 'textbelt') {
+      // TextBelt - 1 free SMS per day
+      const response = await fetch('https://textbelt.com/text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone: to,
+          message: message,
+          key: process.env.SMS_API_KEY || 'textbelt',
+        }),
+      });
+      
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'TextBelt SMS failed');
+      }
+      console.log('Free SMS sent successfully via TextBelt to:', to);
+      return result;
+    } else {
+      throw new Error('Free SMS provider not configured');
+    }
+  } catch (error) {
+    console.error('Failed to send free SMS:', error);
+    throw error;
+  }
+}
+
+async function sendWhatsAppMaytapi(to: string, analysis: any) {
+  try {
+    // Debug: Log environment variables (without sensitive data)
+    console.log('Maytapi configuration check:');
+    console.log('MAYTAPI_TOKEN:', process.env.MAYTAPI_TOKEN ? '***' + process.env.MAYTAPI_TOKEN.slice(-8) : 'undefined');
+    console.log('MAYTAPI_PHONE_ID:', process.env.MAYTAPI_PHONE_ID ? '***' + process.env.MAYTAPI_PHONE_ID.slice(-8) : 'undefined');
+    
+    if (!process.env.MAYTAPI_TOKEN || !process.env.MAYTAPI_PHONE_ID) {
+      console.error('Maytapi credentials not configured');
+      throw new Error('Maytapi WhatsApp service not configured');
+    }
+
+    let message = 'Your Lecture Analysis is Ready!\n\n';
+    if (analysis.summary) {
+      message += `*Summary*\n${analysis.summary}\n\n`;
+    }
+    if (analysis.clinicalConcepts) {
+      message += '*Clinical Concepts*\n';
+      analysis.clinicalConcepts.forEach((concept: any) => {
+        message += `*${concept.name}*: ${concept.definition}\n`;
+      });
+      message += '\n';
+    }
+    if (analysis.studyGuide) {
+      message += '*Study Guide*\n';
+      message += '*Questions*\n';
+      analysis.studyGuide.questions.forEach((q: any) => {
+        message += `*Q:* ${q.question}\n*A:* ${q.answer}\n`;
+      });
+      message += '*Key Terms*\n';
+      analysis.studyGuide.keyTerms.forEach((term: any) => {
+        message += `*${term.term}*: ${term.definition}\n`;
+      });
+    }
+
+    const response = await fetch(`https://api.maytapi.com/api/${process.env.MAYTAPI_PHONE_ID}/${process.env.MAYTAPI_PHONE_NUM}/sendMessage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-maytapi-key': process.env.MAYTAPI_TOKEN,
+      },
+      body: JSON.stringify({
+        to_number: to,
+        type: 'text',
+        message: message,
+      }),
+    });
+
+    const result = await response.json();
+    console.log('Maytapi API response:', result);
+    
+    if (!response.ok) {
+      console.error('Maytapi API error:', response.status, result);
+      throw new Error(result.error || result.message || `Maytapi WhatsApp failed (${response.status})`);
+    }
+    
+    console.log('WhatsApp message sent successfully via Maytapi to:', to);
+    return result;
+  } catch (error) {
+    console.error('Failed to send Maytapi WhatsApp message:', error);
+    throw error;
+  }
 }
 
 async function sendWhatsApp(to: string, analysis: any) {
-  if (!twilioClient) {
-    console.error('Twilio client not configured');
-    return;
-  }
-  let body = 'Your Lecture Analysis is Ready!\n\n';
-  if (analysis.summary) {
-    body += `*Summary*\n${analysis.summary}\n\n`;
-  }
-  if (analysis.clinicalConcepts) {
-    body += '*Clinical Concepts*\n';
-    analysis.clinicalConcepts.forEach((concept: any) => {
-      body += `*${concept.name}*: ${concept.definition}\n`;
-    });
-    body += '\n';
-  }
-  if (analysis.studyGuide) {
-    body += '*Study Guide*\n';
-    body += '*Questions*\n';
-    analysis.studyGuide.questions.forEach((q: any) => {
-      body += `*Q:* ${q.question}\n*A:* ${q.answer}\n`;
-    });
-    body += '*Key Terms*\n';
-    analysis.studyGuide.keyTerms.forEach((term: any) => {
-      body += `*${term.term}*: ${term.definition}\n`;
-    });
-  }
+  try {
+    if (WHATSAPP_PROVIDER === 'maytapi') {
+      return await sendWhatsAppMaytapi(to, analysis);
+    }
 
-  await twilioClient.messages.create({
-    body,
-    from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
-    to: `whatsapp:${to}`,
-  });
+    if (!twilioClient) {
+      console.error('Twilio client not configured');
+      throw new Error('WhatsApp service not configured');
+    }
+
+    if (!process.env.TWILIO_WHATSAPP_NUMBER) {
+      console.error('Twilio WhatsApp number not configured');
+      throw new Error('WhatsApp number not configured');
+    }
+
+    let body = 'Your Lecture Analysis is Ready!\n\n';
+    if (analysis.summary) {
+      body += `*Summary*\n${analysis.summary}\n\n`;
+    }
+    if (analysis.clinicalConcepts) {
+      body += '*Clinical Concepts*\n';
+      analysis.clinicalConcepts.forEach((concept: any) => {
+        body += `*${concept.name}*: ${concept.definition}\n`;
+      });
+      body += '\n';
+    }
+    if (analysis.studyGuide) {
+      body += '*Study Guide*\n';
+      body += '*Questions*\n';
+      analysis.studyGuide.questions.forEach((q: any) => {
+        body += `*Q:* ${q.question}\n*A:* ${q.answer}\n`;
+      });
+      body += '*Key Terms*\n';
+      analysis.studyGuide.keyTerms.forEach((term: any) => {
+        body += `*${term.term}*: ${term.definition}\n`;
+      });
+    }
+
+    await twilioClient.messages.create({
+      body,
+      from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
+      to: `whatsapp:${to}`,
+    });
+    console.log('WhatsApp message sent successfully to:', to);
+  } catch (error) {
+    console.error('Failed to send WhatsApp message:', error);
+    throw error;
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const { transcript, actions, email, whatsapp, analysis, provider = 'gemini', title, subject } = await req.json();
+  try {
+    const { transcript, actions, email, whatsapp, sms, analysis, provider = 'gemini', title, subject } = await req.json();
 
-  const results: { [key: string]: any } = analysis || {};
+    const results: { [key: string]: any } = analysis || {};
 
-  if (!analysis && transcript) {
-    for (const action of actions) {
-      if (action === 'summary') {
-        results.summary = await generateSummary(transcript, provider, title, subject);
-      } else if (action === 'clinicalConcepts') {
-        const concepts = await identifyClinicalConcepts(transcript, provider, title, subject);
-        results.clinicalConcepts = concepts.clinicalConcepts;
-      } else if (action === 'studyGuide') {
-        const guide = await generateStudyGuide(transcript, provider, title, subject);
-        results.studyGuide = guide.studyGuide;
+    if (!analysis && transcript) {
+      for (const action of actions) {
+        if (action === 'summary') {
+          results.summary = await generateSummary(transcript, provider, title, subject);
+        } else if (action === 'clinicalConcepts') {
+          const concepts = await identifyClinicalConcepts(transcript, provider, title, subject);
+          results.clinicalConcepts = concepts.clinicalConcepts;
+        } else if (action === 'studyGuide') {
+          const guide = await generateStudyGuide(transcript, provider, title, subject);
+          results.studyGuide = guide.studyGuide;
+        }
       }
     }
-  }
 
-  if (actions.includes('email') && email) {
-    await sendEmail(email, results);
-  }
+    // Handle email sending
+    if (actions.includes('email') && email) {
+      try {
+        await sendEmail(email, results);
+        results.emailStatus = 'sent';
+      } catch (error: any) {
+        console.error('Email sending failed:', error);
+        results.emailStatus = 'failed';
+        results.emailError = error.message;
+      }
+    }
 
-  if (actions.includes('whatsapp') && whatsapp) {
-    await sendWhatsApp(whatsapp, results);
-  }
+    // Handle WhatsApp sending
+    if (actions.includes('whatsapp') && whatsapp) {
+      try {
+        await sendWhatsApp(whatsapp, results);
+        results.whatsappStatus = 'sent';
+      } catch (error: any) {
+        console.error('WhatsApp sending failed:', error);
+        results.whatsappStatus = 'failed';
+        results.whatsappError = error.message;
+      }
+    }
 
-  return NextResponse.json(results);
+    // Handle SMS sending (Free alternative)
+    if (actions.includes('sms') && sms) {
+      try {
+        let smsMessage = 'Your Lecture Analysis is Ready!\n\n';
+        if (results.summary) {
+          smsMessage += `Summary: ${results.summary.substring(0, 100)}...\n\n`;
+        }
+        if (results.clinicalConcepts && results.clinicalConcepts.length > 0) {
+          smsMessage += `Clinical Concepts: ${results.clinicalConcepts.length} found\n\n`;
+        }
+        if (results.studyGuide) {
+          smsMessage += 'Study guide generated. Check email for details.';
+        }
+        
+        await sendFreeSMS(sms, smsMessage);
+        results.smsStatus = 'sent';
+      } catch (error: any) {
+        console.error('SMS sending failed:', error);
+        results.smsStatus = 'failed';
+        results.smsError = error.message;
+      }
+    }
+
+    return NextResponse.json(results);
+  } catch (error: any) {
+    console.error('Actions API error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
