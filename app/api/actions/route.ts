@@ -30,11 +30,51 @@ function createEmailTransporter() {
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.EMAIL_PORT || '587'),
     secure: process.env.EMAIL_SECURE === 'true',
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 30000,
     auth: {
       user: process.env.EMAIL_USER,
       pass: normalizedPass,
     },
   });
+}
+
+async function sendMailWithFallback(mailOptions: nodemailer.SendMailOptions) {
+  const primaryTransporter = createEmailTransporter();
+  try {
+    await primaryTransporter.sendMail(mailOptions);
+    return;
+  } catch (error: any) {
+    const isGmail = (process.env.EMAIL_HOST || '').includes('gmail');
+    const configuredPort = parseInt(process.env.EMAIL_PORT || '587');
+    const shouldRetryWith465 =
+      isGmail &&
+      configuredPort !== 465 &&
+      (error?.code === 'ETIMEDOUT' || error?.code === 'ECONNECTION' || error?.command === 'CONN');
+
+    if (!shouldRetryWith465) {
+      throw error;
+    }
+
+    // Some environments have trouble reaching smtp.gmail.com:587; retry direct SSL on 465.
+    const rawPass = process.env.EMAIL_PASS || '';
+    const normalizedPass = rawPass.replace(/\s+/g, '');
+    const fallbackTransporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      connectionTimeout: 20000,
+      greetingTimeout: 20000,
+      socketTimeout: 30000,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: normalizedPass,
+      },
+    });
+
+    await fallbackTransporter.sendMail(mailOptions);
+  }
 }
 
 // Configure your Twilio client
@@ -196,8 +236,7 @@ async function sendEmail(to: string, analysis: any) {
       });
     }
 
-    const transporter = createEmailTransporter();
-    await transporter.sendMail({
+    await sendMailWithFallback({
       from: process.env.EMAIL_FROM || '"NurseNotes" <noreply@nursenotes.com>',
       to,
       subject: 'Your Lecture Analysis',
