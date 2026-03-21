@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { resolve4 } from 'node:dns/promises';
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
 import { Mistral } from '@mistralai/mistralai';
@@ -40,6 +41,19 @@ function createEmailTransporter() {
   });
 }
 
+function isNetworkEmailError(error: any) {
+  const code = error?.code;
+  return (
+    code === 'ETIMEDOUT' ||
+    code === 'ESOCKET' ||
+    code === 'ECONNECTION' ||
+    code === 'ENETUNREACH' ||
+    code === 'EHOSTUNREACH' ||
+    code === 'ECONNREFUSED' ||
+    error?.command === 'CONN'
+  );
+}
+
 async function sendMailWithFallback(mailOptions: nodemailer.SendMailOptions) {
   const primaryTransporter = createEmailTransporter();
   try {
@@ -51,29 +65,64 @@ async function sendMailWithFallback(mailOptions: nodemailer.SendMailOptions) {
     const shouldRetryWith465 =
       isGmail &&
       configuredPort !== 465 &&
-      (error?.code === 'ETIMEDOUT' || error?.code === 'ECONNECTION' || error?.command === 'CONN');
+      isNetworkEmailError(error);
 
     if (!shouldRetryWith465) {
-      throw error;
+      if (!isGmail || !isNetworkEmailError(error)) {
+        throw error;
+      }
     }
 
-    // Some environments have trouble reaching smtp.gmail.com:587; retry direct SSL on 465.
+    // Some environments have trouble reaching smtp.gmail.com over IPv6.
+    // Retry with IPv4 addresses and explicit TLS servername.
     const rawPass = process.env.EMAIL_PASS || '';
     const normalizedPass = rawPass.replace(/\s+/g, '');
-    const fallbackTransporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      connectionTimeout: 20000,
-      greetingTimeout: 20000,
-      socketTimeout: 30000,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: normalizedPass,
-      },
-    });
+    const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
+    const ipv4Addrs = await resolve4(host);
 
-    await fallbackTransporter.sendMail(mailOptions);
+    let lastError: any = error;
+    for (const ip of ipv4Addrs) {
+      try {
+        const fallback465 = nodemailer.createTransport({
+          host: ip,
+          port: 465,
+          secure: true,
+          connectionTimeout: 20000,
+          greetingTimeout: 20000,
+          socketTimeout: 30000,
+          tls: { servername: host },
+          auth: {
+            user: process.env.EMAIL_USER,
+            pass: normalizedPass,
+          },
+        });
+        await fallback465.sendMail(mailOptions);
+        return;
+      } catch (e465: any) {
+        lastError = e465;
+        try {
+          const fallback587 = nodemailer.createTransport({
+            host: ip,
+            port: 587,
+            secure: false,
+            requireTLS: true,
+            connectionTimeout: 20000,
+            greetingTimeout: 20000,
+            socketTimeout: 30000,
+            tls: { servername: host },
+            auth: {
+              user: process.env.EMAIL_USER,
+              pass: normalizedPass,
+            },
+          });
+          await fallback587.sendMail(mailOptions);
+          return;
+        } catch (e587: any) {
+          lastError = e587;
+        }
+      }
+    }
+    throw lastError;
   }
 }
 
