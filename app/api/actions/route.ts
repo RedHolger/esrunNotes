@@ -354,6 +354,14 @@ async function sendWhatsApp(to: string, analysis: any) {
 
 export async function POST(req: NextRequest) {
   try {
+    // Debug: Log environment variables (without sensitive data)
+    console.log('=== Production Environment Check ===');
+    console.log('EMAIL_USER:', process.env.EMAIL_USER ? '***' + process.env.EMAIL_USER.slice(-10) : 'undefined');
+    console.log('EMAIL_HOST:', process.env.EMAIL_HOST || 'undefined');
+    console.log('WHATSAPP_PROVIDER:', process.env.WHATSAPP_PROVIDER || 'undefined');
+    console.log('MAYTAPI_TOKEN:', process.env.MAYTAPI_TOKEN ? '***' + process.env.MAYTAPI_TOKEN.slice(-8) : 'undefined');
+    console.log('=====================================');
+
     const { transcript, actions, email, whatsapp, sms, analysis, provider = 'gemini', title, subject } = await req.json();
 
     const results: { [key: string]: any } = analysis || {};
