@@ -11,28 +11,37 @@ type User = {
 };
 
 export async function GET(req: NextRequest) {
-  const res = new NextResponse();
-  const session = await getSession(req, res);
-  if (!session?.user?.email) return NextResponse.json({ error: 'Not authenticated' }, { status: 401, headers: res.headers });
-  await initDb();
-  const p = db();
-  const q = await p.query<User>(
-    'SELECT id,name,email,role FROM users WHERE lower(email)=lower($1) LIMIT 1',
-    [session.user.email]
-  );
-  let user = q.rows[0];
-  if (!user) {
-    const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    const name = session.user.name || session.user.nickname || 'User';
-    const role: User['role'] = 'student';
-    await p.query('INSERT INTO users(id,name,email,password_hash,role) VALUES($1,$2,$3,$4,$5)', [
-      id,
-      name,
-      session.user.email,
-      '',
-      role,
-    ]);
-    user = { id, name, email: session.user.email, role } as User;
+  try {
+    const res = new NextResponse();
+    const session = await getSession(req, res);
+    if (!session?.user?.email) return NextResponse.json({ error: 'Not authenticated' }, { status: 401, headers: res.headers });
+    await initDb();
+    const p = db();
+    const q = await p.query<User>(
+      'SELECT id,name,email,role FROM users WHERE lower(email)=lower($1) LIMIT 1',
+      [session.user.email]
+    );
+    let user = q.rows[0];
+    if (!user) {
+      const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const name = session.user.name || session.user.nickname || 'User';
+      const role: User['role'] = 'student';
+      await p.query('INSERT INTO users(id,name,email,password_hash,role) VALUES($1,$2,$3,$4,$5)', [
+        id,
+        name,
+        session.user.email,
+        '',
+        role,
+      ]);
+      user = { id, name, email: session.user.email, role } as User;
+    }
+    return NextResponse.json({ id: user.id, name: user.name, email: user.email, role: user.role }, { headers: res.headers });
+  } catch (error: any) {
+    console.error('Auth /me error:', error);
+    const message =
+      error?.message === 'DATABASE_URL is not configured'
+        ? 'Database is not configured on the server'
+        : 'Service temporarily unavailable';
+    return NextResponse.json({ error: message }, { status: 503 });
   }
-  return NextResponse.json({ id: user.id, name: user.name, email: user.email, role: user.role }, { headers: res.headers });
 }

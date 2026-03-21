@@ -22,17 +22,20 @@ const gemini = new GoogleGenAI({
 // Remove hardcoded instance here. We will instantiate it inside getCompletion
 // to ensure it picks up the latest env var correctly if the server just restarted.
 
-// Configure your email transporter
-// IMPORTANT: Configure with your actual email service provider's details
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+function createEmailTransporter() {
+  // Gmail app passwords are often pasted with spaces; normalize to avoid auth failures.
+  const rawPass = process.env.EMAIL_PASS || '';
+  const normalizedPass = rawPass.replace(/\s+/g, '');
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: process.env.EMAIL_SECURE === 'true',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: normalizedPass,
+    },
+  });
+}
 
 // Configure your Twilio client
 // IMPORTANT: Replace with your actual Twilio credentials
@@ -193,6 +196,7 @@ async function sendEmail(to: string, analysis: any) {
       });
     }
 
+    const transporter = createEmailTransporter();
     await transporter.sendMail({
       from: process.env.EMAIL_FROM || '"NurseNotes" <noreply@nursenotes.com>',
       to,

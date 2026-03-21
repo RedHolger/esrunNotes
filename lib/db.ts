@@ -5,8 +5,18 @@ let inited = false;
 
 function getPool() {
   if (!pool) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+      throw new Error('DATABASE_URL is not configured');
+    }
+
+    const useSsl =
+      /sslmode=require/i.test(connectionString) ||
+      process.env.PGSSLMODE === 'require';
+
     pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      connectionString,
+      ssl: useSsl ? { rejectUnauthorized: false } : undefined,
     });
   }
   return pool;
