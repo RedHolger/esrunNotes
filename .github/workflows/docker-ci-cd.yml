@@ -68,20 +68,4 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
 
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: Deploy to production
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USER }}
-        key: ${{ secrets.DEPLOY_SSH_KEY }}
-        script: |
-          cd /opt/app
-          docker-compose pull
-          docker-compose up -d
-          docker system prune -f
+  
