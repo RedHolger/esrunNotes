@@ -452,7 +452,7 @@ export default function FileUpload({ setAnalysis }: { setAnalysis: (analysis: an
         <div className="animate-in fade-in zoom-in-95 duration-500 py-8">
           <div className="text-center mb-10">
             <h3 className="text-3xl font-bold text-slate-900 tracking-tight">Analyzing Your Lecture</h3>
-            <p className="text-slate-500 mt-2">"{title}" is being processed</p>
+            <p className="text-slate-500 mt-2">&ldquo;{title}&rdquo; is being processed</p>
           </div>
 
           <div className="max-w-md mx-auto space-y-8 bg-slate-50 rounded-2xl p-8 border border-slate-200">
