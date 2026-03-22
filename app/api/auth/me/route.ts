@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '../../../../lib/auth0';
 import { db, initDb } from '../../../../lib/db';
 
+export const dynamic = 'force-dynamic';
+
 type User = {
   id: string;
   name: string;

@@ -2,6 +2,68 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, Circle, Loader2, UploadCloud, FileAudio, ArrowRight, ArrowLeft } from 'lucide-react';
 
+function ProgressItem({ status, title, description, errorMsg = '' }: { status: string, title: string, description: string, errorMsg?: string }) {
+  if (status === 'pending') return (
+    <div className="flex items-start gap-4 text-slate-400">
+      <Circle className="w-5 h-5 mt-0.5" />
+      <div>
+        <p className="font-medium text-slate-500">{title}</p>
+        <p className="text-sm">{description}</p>
+      </div>
+    </div>
+  );
+  if (status === 'current') return (
+    <div className="flex items-start gap-4 text-indigo-600">
+      <Loader2 className="w-5 h-5 mt-0.5 animate-spin" />
+      <div>
+        <p className="font-medium">{title}</p>
+        <p className="text-sm text-indigo-500/80">{description}</p>
+      </div>
+    </div>
+  );
+  if (status === 'error') return (
+    <div className="flex items-start gap-4 text-red-500">
+      <Circle className="w-5 h-5 mt-0.5" />
+      <div>
+        <p className="font-medium">{title} (Failed)</p>
+        <p className="text-sm text-red-400">{errorMsg}</p>
+      </div>
+    </div>
+  );
+  return (
+    <div className="flex items-start gap-4 text-emerald-600">
+      <CheckCircle2 className="w-5 h-5 mt-0.5" />
+      <div>
+        <p className="font-medium">{title}</p>
+        <p className="text-sm text-emerald-500/80">Complete</p>
+      </div>
+    </div>
+  );
+}
+
+function StepIndicator({ step }: { step: number }) {
+  return (
+    <div className="flex items-center justify-center mb-10">
+      <div className="flex items-center space-x-4 text-sm font-semibold">
+        <div className={`flex items-center gap-2 transition-all duration-300 ${step >= 1 ? 'text-primary-600' : 'text-slate-400'}`}>
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold text-white transition-all duration-300 shadow-lg ${step >= 1 ? 'bg-gradient-to-br from-primary-500 to-primary-600 shadow-primary-500/30' : 'bg-slate-300'}`}>1</div>
+          <span>Upload Audio</span>
+        </div>
+        <div className={`w-16 h-1 rounded-full transition-all duration-300 ${step >= 2 ? 'bg-gradient-to-r from-primary-500 to-secondary-600' : 'bg-slate-200'}`}></div>
+        <div className={`flex items-center gap-2 transition-all duration-300 ${step >= 2 ? 'text-secondary-600' : 'text-slate-400'}`}>
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold text-white transition-all duration-300 shadow-lg ${step >= 2 ? 'bg-gradient-to-br from-secondary-500 to-secondary-600 shadow-secondary-500/30' : 'bg-slate-300'}`}>2</div>
+          <span>Add Details</span>
+        </div>
+        <div className={`w-16 h-1 rounded-full transition-all duration-300 ${step >= 3 ? 'bg-gradient-to-r from-secondary-500 to-accent-600' : 'bg-slate-200'}`}></div>
+        <div className={`flex items-center gap-2 transition-all duration-300 ${step >= 3 ? 'text-accent-600' : 'text-slate-400'}`}>
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold text-white transition-all duration-300 shadow-lg ${step >= 3 ? 'bg-gradient-to-br from-accent-500 to-accent-600 shadow-accent-500/30' : 'bg-slate-300'}`}>3</div>
+          <span>Review</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function FileUpload({ setAnalysis }: { setAnalysis: (analysis: any) => void }) {
   const [step, setStep] = useState(1);
   
@@ -194,90 +256,42 @@ export default function FileUpload({ setAnalysis }: { setAnalysis: (analysis: an
     setAnalysis(finalAnalysis);
   };
 
-  const renderStepIndicator = () => (
-    <div className="flex items-center justify-center mb-8">
-      <div className="flex items-center space-x-4 text-sm font-medium">
-        <div className={`flex items-center gap-2 ${step >= 1 ? 'text-indigo-600' : 'text-slate-400'}`}>
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs text-white ${step >= 1 ? 'bg-indigo-600' : 'bg-slate-300'}`}>1</div>
-          <span>Upload Audio</span>
-        </div>
-        <div className={`w-12 h-px ${step >= 2 ? 'bg-indigo-600' : 'bg-slate-200'}`}></div>
-        <div className={`flex items-center gap-2 ${step >= 2 ? 'text-indigo-600' : 'text-slate-400'}`}>
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs text-white ${step >= 2 ? 'bg-indigo-600' : 'bg-slate-300'}`}>2</div>
-          <span>Add Details</span>
-        </div>
-        <div className={`w-12 h-px ${step >= 3 ? 'bg-indigo-600' : 'bg-slate-200'}`}></div>
-        <div className={`flex items-center gap-2 ${step >= 3 ? 'text-indigo-600' : 'text-slate-400'}`}>
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs text-white ${step >= 3 ? 'bg-indigo-600' : 'bg-slate-300'}`}>3</div>
-          <span>Review</span>
-        </div>
-      </div>
-    </div>
-  );
-
-  const ProgressItem = ({ status, title, description }: { status: string, title: string, description: string }) => {
-    if (status === 'pending') return (
-      <div className="flex items-start gap-4 text-slate-400">
-        <Circle className="w-5 h-5 mt-0.5" />
-        <div>
-          <p className="font-medium text-slate-500">{title}</p>
-          <p className="text-sm">{description}</p>
-        </div>
-      </div>
-    );
-    if (status === 'current') return (
-      <div className="flex items-start gap-4 text-indigo-600">
-        <Loader2 className="w-5 h-5 mt-0.5 animate-spin" />
-        <div>
-          <p className="font-medium">{title}</p>
-          <p className="text-sm text-indigo-500/80">{description}</p>
-        </div>
-      </div>
-    );
-    if (status === 'error') return (
-      <div className="flex items-start gap-4 text-red-500">
-        <Circle className="w-5 h-5 mt-0.5" />
-        <div>
-          <p className="font-medium">{title} (Failed)</p>
-          <p className="text-sm text-red-400">{errorMsg}</p>
-        </div>
-      </div>
-    );
-    return (
-      <div className="flex items-start gap-4 text-emerald-600">
-        <CheckCircle2 className="w-5 h-5 mt-0.5" />
-        <div>
-          <p className="font-medium">{title}</p>
-          <p className="text-sm text-emerald-500/80">Complete</p>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="bg-white shadow-sm border border-slate-200 rounded-2xl p-8 mt-4 max-w-3xl mx-auto">
-      {step < 4 && renderStepIndicator()}
+    <div className="relative bg-white shadow-xl border border-slate-200/80 rounded-3xl p-10 mt-8 max-w-4xl mx-auto overflow-hidden">
+      {/* Decorative gradient background */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary-500/5 to-secondary-500/5 rounded-full blur-3xl -z-0"></div>
 
-      {step === 1 && (
+      <div className="relative z-10">
+        {step < 4 && <StepIndicator step={step} />}
+
+        {step === 1 && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="text-center mb-6">
-            <h3 className="text-2xl font-semibold text-slate-900">Upload your lecture</h3>
+            <h3 className="text-3xl font-extrabold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Upload your lecture</h3>
             <p className="text-slate-500 mt-2">We support MP3, WAV, MP4, and M4A up to 100MB.</p>
           </div>
           <div className="flex items-center justify-center w-full mt-4">
-            <label className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${file ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-indigo-400'}`}>
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+            <label className={`group flex flex-col items-center justify-center w-full h-56 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300 overflow-hidden relative ${file ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-secondary-50' : 'border-slate-300 bg-slate-50 hover:bg-white hover:border-primary-400 hover:shadow-lg'}`}>
+              {/* Hover glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-secondary-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+              <div className="flex flex-col items-center justify-center pt-5 pb-6 relative z-10">
                 {file ? (
                   <>
-                    <FileAudio className="w-10 h-10 mb-3 text-indigo-500" />
-                    <p className="mb-1 text-sm font-semibold text-indigo-700">{file.name}</p>
-                    <p className="text-xs text-indigo-500/70">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                    <div className="w-16 h-16 mb-4 bg-gradient-to-br from-primary-500 to-secondary-600 rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                      <FileAudio className="w-8 h-8 text-white" />
+                    </div>
+                    <p className="mb-1 text-lg font-bold text-primary-700">{file.name}</p>
+                    <p className="text-sm text-primary-500 font-semibold">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                    <p className="text-xs text-slate-500 mt-2">Click to change file</p>
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="w-10 h-10 mb-3 text-slate-400" />
-                    <p className="mb-1 text-sm text-slate-600"><span className="font-semibold text-indigo-600">Click to upload</span> or drag and drop</p>
-                    <p className="text-xs text-slate-400">Audio or Video format</p>
+                    <div className="w-16 h-16 mb-4 bg-gradient-to-br from-slate-200 to-slate-300 rounded-2xl flex items-center justify-center group-hover:from-primary-500 group-hover:to-secondary-600 transition-all duration-300 shadow-md group-hover:shadow-lg transform group-hover:scale-110">
+                      <UploadCloud className="w-8 h-8 text-slate-500 group-hover:text-white transition-colors duration-300" />
+                    </div>
+                    <p className="mb-1 text-base text-slate-600"><span className="font-bold text-primary-600">Click to upload</span> or drag and drop</p>
+                    <p className="text-sm text-slate-400 font-medium">Audio or Video format</p>
                   </>
                 )}
               </div>
@@ -285,12 +299,14 @@ export default function FileUpload({ setAnalysis }: { setAnalysis: (analysis: an
             </label>
           </div>
           <div className="mt-8 flex justify-end">
-            <button 
-              onClick={() => setStep(2)} 
+            <button
+              onClick={() => setStep(2)}
               disabled={!file}
-              className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-primary-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none hover:scale-105 transform disabled:hover:scale-100 overflow-hidden"
             >
-              Next Step <ArrowRight className="w-4 h-4" />
+              <span className="relative z-10">Next Step</span>
+              <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-secondary-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
           </div>
         </div>
@@ -299,38 +315,39 @@ export default function FileUpload({ setAnalysis }: { setAnalysis: (analysis: an
       {step === 2 && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
           <div className="text-center mb-6">
-            <h3 className="text-2xl font-semibold text-slate-900">Lecture Details</h3>
+            <h3 className="text-3xl font-extrabold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Lecture Details</h3>
             <p className="text-slate-500 mt-2">Help us categorize and understand your notes better.</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Lecture Title *</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Lecture Title *</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all shadow-sm"
+              className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all shadow-sm hover:border-slate-300 bg-white"
+              placeholder="e.g., Cardiovascular Physiology Lecture"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Lecture Description (Optional)</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Lecture Description (Optional)</label>
             <textarea
               placeholder="Provide context about this lecture, course, professor..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all shadow-sm resize-none"
+              className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all shadow-sm resize-none hover:border-slate-300 bg-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Subject / Tag</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Subject / Tag</label>
             <div className="flex flex-col sm:flex-row gap-3">
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full sm:flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all shadow-sm bg-white"
+                className="w-full sm:flex-1 rounded-xl border-2 border-slate-200 px-4 py-3 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all shadow-sm bg-white hover:border-slate-300"
               >
                 <option value="">Select subject...</option>
                 {subjects.map((s) => (
@@ -345,12 +362,12 @@ export default function FileUpload({ setAnalysis }: { setAnalysis: (analysis: an
                       value={newSubject}
                       onChange={(e) => setNewSubject(e.target.value)}
                       placeholder="New subject"
-                      className="w-full rounded-xl border border-slate-300 px-3 py-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none shadow-sm"
+                      className="w-full rounded-xl border-2 border-slate-200 px-3 py-3 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm"
                     />
-                    <button onClick={addSubject} className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white hover:bg-slate-800">Save</button>
+                    <button onClick={addSubject} className="rounded-xl bg-gradient-to-r from-primary-500 to-secondary-600 px-4 py-3 text-sm font-bold text-white hover:shadow-lg hover:shadow-primary-500/30 transition-all">Save</button>
                   </div>
                 ) : (
-                  <button onClick={() => setAddingSubject(true)} className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm whitespace-nowrap">
+                  <button onClick={() => setAddingSubject(true)} className="rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:border-primary-400 shadow-sm whitespace-nowrap transition-all">
                     + Add New
                   </button>
                 )
@@ -359,13 +376,13 @@ export default function FileUpload({ setAnalysis }: { setAnalysis: (analysis: an
           </div>
 
           <div className="mt-8 flex justify-between">
-            <button onClick={() => setStep(1)} className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-300 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-all">
+            <button onClick={() => setStep(1)} className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
-            <button 
-              onClick={() => setStep(3)} 
+            <button
+              onClick={() => setStep(3)}
               disabled={!title}
-              className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-secondary-500 to-accent-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-secondary-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transform disabled:hover:scale-100"
             >
               Next: Review <ArrowRight className="w-4 h-4" />
             </button>
@@ -376,73 +393,75 @@ export default function FileUpload({ setAnalysis }: { setAnalysis: (analysis: an
       {step === 3 && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
           <div className="text-center mb-6">
-            <h3 className="text-2xl font-semibold text-slate-900">Review & Submit</h3>
+            <h3 className="text-3xl font-extrabold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">Review & Submit</h3>
             <p className="text-slate-500 mt-2">Choose how you want AI to analyze your lecture.</p>
           </div>
 
-          <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
-            <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="glassmorphism border border-white/50 rounded-2xl p-6 shadow-lg">
+            <div className="grid grid-cols-2 gap-6 text-sm">
               <div>
-                <p className="text-slate-500 mb-1">Audio Source</p>
-                <p className="font-medium text-slate-900 flex items-center gap-2">
-                  <FileAudio className="w-4 h-4 text-indigo-500" /> {file?.name}
+                <p className="text-slate-500 mb-2 font-semibold text-xs uppercase tracking-wide">Audio Source</p>
+                <p className="font-bold text-slate-900 flex items-center gap-2">
+                  <FileAudio className="w-4 h-4 text-primary-500" /> {file?.name}
                 </p>
               </div>
               <div>
-                <p className="text-slate-500 mb-1">Lecture Title</p>
-                <p className="font-medium text-slate-900">{title}</p>
+                <p className="text-slate-500 mb-2 font-semibold text-xs uppercase tracking-wide">Lecture Title</p>
+                <p className="font-bold text-slate-900">{title}</p>
               </div>
               <div>
-                <p className="text-slate-500 mb-1">Subject</p>
-                <p className="font-medium text-slate-900">{subject || 'None'}</p>
+                <p className="text-slate-500 mb-2 font-semibold text-xs uppercase tracking-wide">Subject</p>
+                <p className="font-bold text-slate-900">{subject || 'None'}</p>
               </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-3">AI Engine</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-3">AI Engine</label>
             <select
               value={provider}
               onChange={(e) => setProvider(e.target.value as 'gemini' | 'openai' | 'mistral')}
-              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none shadow-sm bg-white"
+              className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 text-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm bg-white hover:border-slate-300 transition-all"
             >
-              <option value="gemini">Google Gemini (Default)</option>
-              <option value="openai">OpenAI (GPT-4o)</option>
-              <option value="mistral">Mistral (Large)</option>
+              <option value="gemini">🤖 Google Gemini (Default)</option>
+              <option value="openai">⚡ OpenAI (GPT-4o)</option>
+              <option value="mistral">🚀 Mistral (Large)</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-3">What happens next?</label>
-            <div className="space-y-3 bg-white border border-slate-200 rounded-xl p-4">
+            <label className="block text-sm font-semibold text-slate-700 mb-3">Analysis Options</label>
+            <div className="space-y-3 bg-gradient-to-br from-slate-50 to-white border-2 border-slate-200 rounded-2xl p-5 shadow-sm">
               {[
-                { id: 'summary', label: 'Generate lecture overview and key takeaways' },
-                { id: 'clinicalConcepts', label: 'Extract diseases, medications, and interventions' },
-                { id: 'studyGuide', label: 'Create NCLEX-style questions and study materials' },
+                { id: 'summary', label: 'Generate lecture overview and key takeaways', icon: '📝' },
+                { id: 'clinicalConcepts', label: 'Extract diseases, medications, and interventions', icon: '🩺' },
+                { id: 'studyGuide', label: 'Create NCLEX-style questions and study materials', icon: '📚' },
               ].map((action) => (
-                <label key={action.id} className="flex items-center gap-3 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
+                <label key={action.id} className="flex items-center gap-3 cursor-pointer group p-3 rounded-xl hover:bg-white transition-all">
+                  <input
+                    type="checkbox"
                     checked={actions.includes(action.id)}
                     onChange={() => handleActionChange(action.id)}
-                    className="w-4 h-4 text-indigo-600 bg-slate-100 border-slate-300 rounded focus:ring-indigo-500"
+                    className="w-5 h-5 text-primary-600 bg-white border-2 border-slate-300 rounded-md focus:ring-2 focus:ring-primary-500/20 transition-all"
                   />
-                  <span className="text-sm text-slate-700 group-hover:text-slate-900">{action.label}</span>
+                  <span className="text-lg">{action.icon}</span>
+                  <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">{action.label}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          <div className="mt-8 flex justify-between pt-4 border-t border-slate-100">
-            <button onClick={() => setStep(2)} className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-300 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-all">
+          <div className="mt-8 flex justify-between pt-4 border-t-2 border-slate-100">
+            <button onClick={() => setStep(2)} className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
-            <button 
-              onClick={startAnalysis} 
+            <button
+              onClick={startAnalysis}
               disabled={actions.length === 0}
-              className="flex items-center gap-2 px-8 py-2.5 bg-[#17B794] text-white font-medium rounded-xl hover:bg-[#129A7C] transition-all shadow-md shadow-[#17B794]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-accent-500 to-accent-600 text-white font-bold rounded-xl hover:shadow-xl hover:shadow-accent-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transform disabled:hover:scale-100 overflow-hidden"
             >
-              Analyze Lecture
+              <span className="relative z-10">🚀 Analyze Lecture</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-accent-600 to-accent-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
           </div>
         </div>
@@ -495,6 +514,7 @@ export default function FileUpload({ setAnalysis }: { setAnalysis: (analysis: an
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

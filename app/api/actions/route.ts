@@ -3,6 +3,7 @@ import { resolve4 } from 'node:dns/promises';
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
 import { Mistral } from '@mistralai/mistralai';
+import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 import twilio from 'twilio';
 import { config } from '../../../lib/config'; // Import the centralized config
@@ -257,9 +258,10 @@ async function sendEmail(to: string, analysis: any) {
     console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***' + process.env.EMAIL_PASS.slice(-4) : 'undefined');
     console.log('EMAIL_HOST:', process.env.EMAIL_HOST || 'undefined');
     
-    // Check if email is configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.error('Email credentials not configured');
+    const hasResend = !!process.env.RESEND_API_KEY;
+    const hasSmtp = !!process.env.EMAIL_USER && !!process.env.EMAIL_PASS;
+    if (!hasResend && !hasSmtp) {
+      console.error('Neither Resend nor SMTP email credentials are configured');
       throw new Error('Email service not configured');
     }
 
@@ -285,10 +287,25 @@ async function sendEmail(to: string, analysis: any) {
       });
     }
 
+    const from = process.env.EMAIL_FROM || '"NurseNotes" <noreply@nursenotes.com>';
+    const subject = 'Your Lecture Analysis';
+
+    if (hasResend) {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from,
+        to,
+        subject,
+        html,
+      });
+      console.log('Email sent successfully via Resend to:', to);
+      return;
+    }
+
     await sendMailWithFallback({
       from: process.env.EMAIL_FROM || '"NurseNotes" <noreply@nursenotes.com>',
       to,
-      subject: 'Your Lecture Analysis',
+      subject,
       html,
     });
     console.log('Email sent successfully to:', to);

@@ -1,250 +1,151 @@
-2026-03-21T07:12:11.141510297Z EMAIL_USER: ***@gmail.com
-2026-03-21T07:12:11.141577482Z EMAIL_PASS: ***estd
-2026-03-21T07:12:11.141589713Z EMAIL_HOST: smtp.gmail.com
-2026-03-21T07:12:26.384984903Z === Production Environment Check ===
-2026-03-21T07:12:26.385027017Z EMAIL_USER: ***@gmail.com
-2026-03-21T07:12:26.385039738Z EMAIL_HOST: smtp.gmail.com
-2026-03-21T07:12:26.385043248Z WHATSAPP_PROVIDER: maytapi
-2026-03-21T07:12:26.385048068Z MAYTAPI_TOKEN: ***9a992689
-2026-03-21T07:12:26.385053269Z =====================================
-2026-03-21T07:12:26.386835658Z Maytapi configuration check:
-2026-03-21T07:12:26.38685752Z MAYTAPI_TOKEN: ***9a992689
-2026-03-21T07:12:26.386926235Z MAYTAPI_PHONE_ID: ***ada2d603
-2026-03-21T07:12:26.847486954Z Maytapi API response: {
-2026-03-21T07:12:26.847509286Z   success: true,
-2026-03-21T07:12:26.847515546Z   data: {
-2026-03-21T07:12:26.847537988Z     chatId: '918448154757@c.us',
-2026-03-21T07:12:26.847545609Z     msgId: '50dbb700-24f5-11f1-9937-270a7f215b28'
-2026-03-21T07:12:26.847551879Z   }
-2026-03-21T07:12:26.84755756Z }
-2026-03-21T07:12:26.8475701Z WhatsApp message sent successfully via Maytapi to: 918448154757
-2026-03-21T07:13:40.276506144Z  ⨯ AggregateError [ECONNREFUSED]: 
-2026-03-21T07:13:40.277027995Z     at /app/node_modules/pg-pool/index.js:45:11
-2026-03-21T07:13:40.277037375Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-2026-03-21T07:13:40.277043456Z     at async i (/app/.next/server/app/api/auth/me/route.js:1:4162)
-2026-03-21T07:13:40.277048406Z     at async u (/app/.next/server/app/api/lectures/route.js:1:1995)
-2026-03-21T07:13:40.277053527Z     at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
-2026-03-21T07:13:40.277059397Z     at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
-2026-03-21T07:13:40.277070998Z     at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
-2026-03-21T07:13:40.277074408Z     at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
-2026-03-21T07:13:40.277077569Z     at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
-2026-03-21T07:13:40.277080969Z     at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
-2026-03-21T07:13:40.277084619Z   code: 'ECONNREFUSED',
-2026-03-21T07:13:40.277087589Z   [errors]: [
-2026-03-21T07:13:40.27709075Z     Error: connect ECONNREFUSED ::1:5432
-2026-03-21T07:13:40.2770947Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:40.27709806Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:40.277101151Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:40.277104361Z       errno: -111,
-2026-03-21T07:13:40.277108081Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:40.277111031Z       syscall: 'connect',
-2026-03-21T07:13:40.277113981Z       address: '::1',
-2026-03-21T07:13:40.277117092Z       port: 5432
-2026-03-21T07:13:40.277120242Z     },
-2026-03-21T07:13:40.277123492Z     Error: connect ECONNREFUSED 127.0.0.1:5432
-2026-03-21T07:13:40.277126542Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:40.277129603Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:40.277132923Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:40.277135803Z       errno: -111,
-2026-03-21T07:13:40.277138743Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:40.277141654Z       syscall: 'connect',
-2026-03-21T07:13:40.277144594Z       address: '127.0.0.1',
-2026-03-21T07:13:40.277147654Z       port: 5432
-2026-03-21T07:13:40.277150494Z     }
-2026-03-21T07:13:40.277153635Z   ]
-2026-03-21T07:13:40.277173996Z }
-2026-03-21T07:13:40.305412651Z  ⨯ AggregateError [ECONNREFUSED]: 
-2026-03-21T07:13:40.305427982Z     at /app/node_modules/pg-pool/index.js:45:11
-2026-03-21T07:13:40.305433113Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-2026-03-21T07:13:40.305437313Z     at async i (/app/.next/server/app/api/auth/me/route.js:1:4162)
-2026-03-21T07:13:40.305441123Z     at async u (/app/.next/server/app/api/auth/me/route.js:1:2037)
-2026-03-21T07:13:40.305444844Z     at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
-2026-03-21T07:13:40.305449744Z     at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
-2026-03-21T07:13:40.305453624Z     at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
-2026-03-21T07:13:40.305457585Z     at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
-2026-03-21T07:13:40.305461415Z     at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
-2026-03-21T07:13:40.305466005Z     at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
-2026-03-21T07:13:40.305470695Z   code: 'ECONNREFUSED',
-2026-03-21T07:13:40.305474846Z   [errors]: [
-2026-03-21T07:13:40.305479096Z     Error: connect ECONNREFUSED ::1:5432
-2026-03-21T07:13:40.305484077Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:40.305488467Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:40.305504108Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:40.305508349Z       errno: -111,
-2026-03-21T07:13:40.305512839Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:40.305516799Z       syscall: 'connect',
-2026-03-21T07:13:40.305520479Z       address: '::1',
-2026-03-21T07:13:40.30552399Z       port: 5432
-2026-03-21T07:13:40.30552753Z     },
-2026-03-21T07:13:40.30553139Z     Error: connect ECONNREFUSED 127.0.0.1:5432
-2026-03-21T07:13:40.305535541Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:40.305553362Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:40.305557562Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:40.305561373Z       errno: -111,
-2026-03-21T07:13:40.305565283Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:40.305568783Z       syscall: 'connect',
-2026-03-21T07:13:40.305572963Z       address: '127.0.0.1',
-2026-03-21T07:13:40.305576924Z       port: 5432
-2026-03-21T07:13:40.305580714Z     }
-2026-03-21T07:13:40.305584755Z   ]
-2026-03-21T07:13:40.305588395Z }
-2026-03-21T07:13:40.306224794Z  ⨯ AggregateError [ECONNREFUSED]: 
-2026-03-21T07:13:40.306233195Z     at /app/node_modules/pg-pool/index.js:45:11
-2026-03-21T07:13:40.306237095Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-2026-03-21T07:13:40.306240676Z     at async i (/app/.next/server/app/api/auth/me/route.js:1:4162)
-2026-03-21T07:13:40.306243836Z     at async u (/app/.next/server/app/api/auth/me/route.js:1:2037)
-2026-03-21T07:13:40.306246886Z     at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
-2026-03-21T07:13:40.306250296Z     at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
-2026-03-21T07:13:40.306253057Z     at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
-2026-03-21T07:13:40.306255997Z     at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
-2026-03-21T07:13:40.306259087Z     at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
-2026-03-21T07:13:40.306262617Z     at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
-2026-03-21T07:13:40.306265888Z   code: 'ECONNREFUSED',
-2026-03-21T07:13:40.306269328Z   [errors]: [
-2026-03-21T07:13:40.306272908Z     Error: connect ECONNREFUSED ::1:5432
-2026-03-21T07:13:40.306276398Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:40.306279599Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:40.306302211Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:40.306310101Z       errno: -111,
-2026-03-21T07:13:40.306313791Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:40.306316822Z       syscall: 'connect',
-2026-03-21T07:13:40.306319942Z       address: '::1',
-2026-03-21T07:13:40.306322932Z       port: 5432
-2026-03-21T07:13:40.306325852Z     },
-2026-03-21T07:13:40.306328622Z     Error: connect ECONNREFUSED 127.0.0.1:5432
-2026-03-21T07:13:40.306331513Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:40.306334543Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:40.306337673Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:40.306340854Z       errno: -111,
-2026-03-21T07:13:40.306343854Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:40.306353755Z       syscall: 'connect',
-2026-03-21T07:13:40.306356915Z       address: '127.0.0.1',
-2026-03-21T07:13:40.306360445Z       port: 5432
-2026-03-21T07:13:40.306363455Z     }
-2026-03-21T07:13:40.306366396Z   ]
-2026-03-21T07:13:40.306369496Z }
-2026-03-21T07:13:40.888144473Z  ⨯ AggregateError [ECONNREFUSED]: 
-2026-03-21T07:13:40.888164875Z     at /app/node_modules/pg-pool/index.js:45:11
-2026-03-21T07:13:40.888169805Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-2026-03-21T07:13:40.888174056Z     at async i (/app/.next/server/app/api/auth/me/route.js:1:4162)
-2026-03-21T07:13:40.888177546Z     at async u (/app/.next/server/app/api/subjects/route.js:1:1899)
-2026-03-21T07:13:40.888180616Z     at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
-2026-03-21T07:13:40.888184716Z     at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
-2026-03-21T07:13:40.888188117Z     at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
-2026-03-21T07:13:40.888191437Z     at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
-2026-03-21T07:13:40.888194887Z     at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
-2026-03-21T07:13:40.888198717Z     at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
-2026-03-21T07:13:40.888202388Z   code: 'ECONNREFUSED',
-2026-03-21T07:13:40.888205278Z   [errors]: [
-2026-03-21T07:13:40.888208248Z     Error: connect ECONNREFUSED ::1:5432
-2026-03-21T07:13:40.888211889Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:40.888214919Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:40.888217809Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:40.888220679Z       errno: -111,
-2026-03-21T07:13:40.88822435Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:40.88822724Z       syscall: 'connect',
-2026-03-21T07:13:40.88823044Z       address: '::1',
-2026-03-21T07:13:40.88823366Z       port: 5432
-2026-03-21T07:13:40.888236631Z     },
-2026-03-21T07:13:40.888239511Z     Error: connect ECONNREFUSED 127.0.0.1:5432
-2026-03-21T07:13:40.888242311Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:40.888245121Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:40.888247912Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:40.888250792Z       errno: -111,
-2026-03-21T07:13:40.888253692Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:40.888257252Z       syscall: 'connect',
-2026-03-21T07:13:40.888260132Z       address: '127.0.0.1',
-2026-03-21T07:13:40.888263163Z       port: 5432
-2026-03-21T07:13:40.888266213Z     }
-2026-03-21T07:13:40.888269193Z   ]
-2026-03-21T07:13:40.888272173Z }
-2026-03-21T07:13:43.944388009Z  ⨯ AggregateError [ECONNREFUSED]: 
-2026-03-21T07:13:43.944413971Z     at /app/node_modules/pg-pool/index.js:45:11
-2026-03-21T07:13:43.944420392Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-2026-03-21T07:13:43.944426172Z     at async i (/app/.next/server/app/api/auth/me/route.js:1:4162)
-2026-03-21T07:13:43.944430982Z     at async u (/app/.next/server/app/api/lectures/route.js:1:1995)
-2026-03-21T07:13:43.944435873Z     at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
-2026-03-21T07:13:43.944441053Z     at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
-2026-03-21T07:13:43.944452834Z     at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
-2026-03-21T07:13:43.944455844Z     at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
-2026-03-21T07:13:43.944459045Z     at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
-2026-03-21T07:13:43.944462395Z     at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
-2026-03-21T07:13:43.944466025Z   code: 'ECONNREFUSED',
-2026-03-21T07:13:43.944468805Z   [errors]: [
-2026-03-21T07:13:43.944472216Z     Error: connect ECONNREFUSED ::1:5432
-2026-03-21T07:13:43.944478426Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:43.944481737Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:43.944484727Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:43.944487837Z       errno: -111,
-2026-03-21T07:13:43.944492007Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:43.944494298Z       syscall: 'connect',
-2026-03-21T07:13:43.944496248Z       address: '::1',
-2026-03-21T07:13:43.944498218Z       port: 5432
-2026-03-21T07:13:43.944500208Z     },
-2026-03-21T07:13:43.944502258Z     Error: connect ECONNREFUSED 127.0.0.1:5432
-2026-03-21T07:13:43.944504318Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:43.944506299Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:43.944508408Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:43.944510419Z       errno: -111,
-2026-03-21T07:13:43.944512399Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:43.944514379Z       syscall: 'connect',
-2026-03-21T07:13:43.944516299Z       address: '127.0.0.1',
-2026-03-21T07:13:43.944518239Z       port: 5432
-2026-03-21T07:13:43.94452018Z     }
-2026-03-21T07:13:43.94452218Z   ]
-2026-03-21T07:13:43.94452418Z }
-2026-03-21T07:13:43.94452625Z  ⨯ AggregateError [ECONNREFUSED]: 
-2026-03-21T07:13:43.94452824Z     at /app/node_modules/pg-pool/index.js:45:11
-2026-03-21T07:13:43.9445303Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-2026-03-21T07:13:43.94453235Z     at async i (/app/.next/server/app/api/auth/me/route.js:1:4162)
-2026-03-21T07:13:43.944534321Z     at async u (/app/.next/server/app/api/auth/me/route.js:1:2037)
-2026-03-21T07:13:43.944536361Z     at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
-2026-03-21T07:13:43.944540611Z     at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
-2026-03-21T07:13:43.944542741Z     at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
-2026-03-21T07:13:43.944544691Z     at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
-2026-03-21T07:13:43.944546642Z     at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
-2026-03-21T07:13:43.944548642Z     at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
-2026-03-21T07:13:43.944550602Z   code: 'ECONNREFUSED',
-2026-03-21T07:13:43.944552532Z   [errors]: [
-2026-03-21T07:13:43.944554532Z     Error: connect ECONNREFUSED ::1:5432
-2026-03-21T07:13:43.944556572Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:43.944558543Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:43.944564033Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:43.944566033Z       errno: -111,
-2026-03-21T07:13:43.944568003Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:43.944570204Z       syscall: 'connect',
-2026-03-21T07:13:43.944572233Z       address: '::1',
-2026-03-21T07:13:43.944574224Z       port: 5432
-2026-03-21T07:13:43.944576204Z     },
-2026-03-21T07:13:43.944578304Z     Error: connect ECONNREFUSED 127.0.0.1:5432
-2026-03-21T07:13:43.944580424Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:43.944584034Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:43.944586155Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:43.944588145Z       errno: -111,
-2026-03-21T07:13:43.944590145Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:43.944592145Z       syscall: 'connect',
-2026-03-21T07:13:43.944594105Z       address: '127.0.0.1',
-2026-03-21T07:13:43.944596206Z       port: 5432
-2026-03-21T07:13:43.944598256Z     }
-2026-03-21T07:13:43.944600276Z   ]
-2026-03-21T07:13:43.944602246Z }
-2026-03-21T07:13:44.009052708Z  ⨯ AggregateError [ECONNREFUSED]: 
-2026-03-21T07:13:44.009086421Z     at /app/node_modules/pg-pool/index.js:45:11
-2026-03-21T07:13:44.009090582Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-2026-03-21T07:13:44.009094762Z     at async i (/app/.next/server/app/api/auth/me/route.js:1:4162)
-2026-03-21T07:13:44.009097372Z     at async u (/app/.next/server/app/api/auth/me/route.js:1:2037)
-2026-03-21T07:13:44.009099772Z     at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
-2026-03-21T07:13:44.009102903Z     at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
-2026-03-21T07:13:44.009105393Z     at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
-2026-03-21T07:13:44.009108793Z     at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
-2026-03-21T07:13:44.009111853Z     at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
-2026-03-21T07:13:44.009115273Z     at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
-2026-03-21T07:13:44.009119074Z   code: 'ECONNREFUSED',
-2026-03-21T07:13:44.009121744Z   [errors]: [
-2026-03-21T07:13:44.009124364Z     Error: connect ECONNREFUSED ::1:5432
-2026-03-21T07:13:44.009127474Z         at createConnectionError (node:net:1652:14)
-2026-03-21T07:13:44.009129885Z         at afterConnectMultiple (node:net:1682:16)
-2026-03-21T07:13:44.009132405Z         at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
-2026-03-21T07:13:44.009135005Z       errno: -111,
-2026-03-21T07:13:44.009137965Z       code: 'ECONNREFUSED',
-2026-03-21T07:13:44.009140465Z       syscall: 'connect',
+=== Production Environment Check ===
+EMAIL_USER: ***@gmail.com
+EMAIL_HOST: smtp.gmail.com
+WHATSAPP_PROVIDER: maytapi
+MAYTAPI_TOKEN: ***9a992689
+=====================================
+Email configuration check:
+EMAIL_USER: ***@gmail.com
+EMAIL_PASS: ***estd
+EMAIL_HOST: smtp.gmail.com
+ ⨯ AggregateError [ECONNREFUSED]: 
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async i (/app/.next/server/app/api/auth/me/route.js:1:4558)
+    at async c (/app/.next/server/app/api/lectures/route.js:1:1995)
+    at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
+    at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
+    at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
+    at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16)
+        at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5432
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16)
+        at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5432
+    }
+  ]
+}
+Auth /me error: AggregateError [ECONNREFUSED]: 
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async i (/app/.next/server/app/api/auth/me/route.js:1:4558)
+    at async u (/app/.next/server/app/api/auth/me/route.js:1:2041)
+    at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
+    at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
+    at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
+    at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16)
+        at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5432
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16)
+        at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5432
+    }
+  ]
+}
+Auth /me error: AggregateError [ECONNREFUSED]: 
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async i (/app/.next/server/app/api/auth/me/route.js:1:4558)
+    at async u (/app/.next/server/app/api/auth/me/route.js:1:2041)
+    at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
+    at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
+    at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
+    at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16)
+        at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5432
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16)
+        at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5432
+    }
+  ]
+}
+ ⨯ AggregateError [ECONNREFUSED]: 
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async i (/app/.next/server/app/api/auth/me/route.js:1:4558)
+    at async u (/app/.next/server/app/api/subjects/route.js:1:1899)
+    at async /app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38411
+    at async e_.execute (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:27880)
+    at async e_.handle (/app/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:39943)
+    at async doRender (/app/node_modules/next/dist/server/base-server.js:1366:42)
+    at async cacheEntry.responseCache.get.routeKind (/app/node_modules/next/dist/server/base-server.js:1588:28)
+    at async NextNodeServer.renderToResponseWithComponentsImpl (/app/node_modules/next/dist/server/base-server.js:1496:28) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16)
+        at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5432
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16)
+        at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5432
+    }
+  ]
+}
+
