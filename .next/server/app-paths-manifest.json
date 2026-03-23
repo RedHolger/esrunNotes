@@ -1,25 +1,3 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/activity/page": "app/activity/page.js",
-  "/admin/page": "app/admin/page.js",
-  "/api/health/route": "app/api/health/route.js",
-  "/api/lectures/[id]/download/route": "app/api/lectures/[id]/download/route.js",
-  "/api/lectures/route": "app/api/lectures/route.js",
-  "/api/subjects/[id]/route": "app/api/subjects/[id]/route.js",
-  "/api/lectures/[id]/route": "app/api/lectures/[id]/route.js",
-  "/api/subjects/route": "app/api/subjects/route.js",
-  "/api/upload/route": "app/api/upload/route.js",
-  "/api/users/[id]/route": "app/api/users/[id]/route.js",
-  "/api/users/route": "app/api/users/route.js",
-  "/lectures/[id]/page": "app/lectures/[id]/page.js",
-  "/page": "app/page.js",
-  "/login/page": "app/login/page.js",
-  "/lectures/page": "app/lectures/page.js",
-  "/profile/page": "app/profile/page.js",
-  "/register/page": "app/register/page.js",
-  "/transcription/page": "app/transcription/page.js",
-  "/api/auth/register/route": "app/api/auth/register/route.js",
-  "/api/auth/[auth0]/route": "app/api/auth/[auth0]/route.js",
-  "/api/actions/route": "app/api/actions/route.js",
-  "/api/auth/me/route": "app/api/auth/me/route.js"
+  "/page": "app/page.js"
 }

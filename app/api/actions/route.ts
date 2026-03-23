@@ -25,17 +25,17 @@ const gemini = new GoogleGenAI({
 
 function createEmailTransporter() {
   // Gmail app passwords are often pasted with spaces; normalize to avoid auth failures.
-  const rawPass = process.env.EMAIL_PASS || '';
+  const rawPass = process.env.SMTP_TO_PASSWORD || '';
   const normalizedPass = rawPass.replace(/\s+/g, '');
   return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: process.env.EMAIL_SECURE === 'true',
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: parseInt(process.env.SMTP_PORT || '465'),
+    secure: process.env.SMTP_SECURE === 'true' || true, // use TLS for port 465
     connectionTimeout: 20000,
     greetingTimeout: 20000,
     socketTimeout: 30000,
     auth: {
-      user: process.env.EMAIL_USER,
+      user: process.env.SMTP_TO_EMAIL,
       pass: normalizedPass,
     },
   });
@@ -76,9 +76,9 @@ async function sendMailWithFallback(mailOptions: nodemailer.SendMailOptions) {
 
     // Some environments have trouble reaching smtp.gmail.com over IPv6.
     // Retry with IPv4 addresses and explicit TLS servername.
-    const rawPass = process.env.EMAIL_PASS || '';
+    const rawPass = process.env.SMTP_TO_PASSWORD || '';
     const normalizedPass = rawPass.replace(/\s+/g, '');
-    const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
+    const host = process.env.SMTP_HOST || 'smtp.gmail.com';
     const ipv4Addrs = await resolve4(host);
 
     let lastError: any = error;
@@ -93,7 +93,7 @@ async function sendMailWithFallback(mailOptions: nodemailer.SendMailOptions) {
           socketTimeout: 30000,
           tls: { servername: host },
           auth: {
-            user: process.env.EMAIL_USER,
+            user: process.env.SMTP_TO_EMAIL,
             pass: normalizedPass,
           },
         });
@@ -112,7 +112,7 @@ async function sendMailWithFallback(mailOptions: nodemailer.SendMailOptions) {
             socketTimeout: 30000,
             tls: { servername: host },
             auth: {
-              user: process.env.EMAIL_USER,
+              user: process.env.SMTP_TO_EMAIL,
               pass: normalizedPass,
             },
           });
@@ -254,11 +254,11 @@ async function sendEmail(to: string, analysis: any) {
   try {
     // Debug: Log environment variables (without sensitive data)
     console.log('Email configuration check:');
-    console.log('EMAIL_USER:', process.env.EMAIL_USER ? '***' + process.env.EMAIL_USER.slice(-10) : 'undefined');
-    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***' + process.env.EMAIL_PASS.slice(-4) : 'undefined');
-    console.log('EMAIL_HOST:', process.env.EMAIL_HOST || 'undefined');
+    console.log('SMTP_TO_EMAIL:', process.env.SMTP_TO_EMAIL ? '***' + process.env.SMTP_TO_EMAIL.slice(-10) : 'undefined');
+    console.log('SMTP_TO_PASSWORD:', process.env.SMTP_TO_PASSWORD ? '***' + process.env.SMTP_TO_PASSWORD.slice(-4) : 'undefined');
+    console.log('SMTP_HOST:', process.env.SMTP_HOST || 'undefined');
     
-    const hasSmtp = !!process.env.EMAIL_USER && !!process.env.EMAIL_PASS;
+    const hasSmtp = !!process.env.SMTP_TO_EMAIL && !!process.env.SMTP_TO_PASSWORD;
     if (!hasSmtp) {
       console.error('SMTP email credentials are not configured');
       throw new Error('Email service not configured');
@@ -449,8 +449,8 @@ export async function POST(req: NextRequest) {
   try {
     // Debug: Log environment variables (without sensitive data)
     console.log('=== Production Environment Check ===');
-    console.log('EMAIL_USER:', process.env.EMAIL_USER ? '***' + process.env.EMAIL_USER.slice(-10) : 'undefined');
-    console.log('EMAIL_HOST:', process.env.EMAIL_HOST || 'undefined');
+    console.log('SMTP_TO_EMAIL:', process.env.SMTP_TO_EMAIL ? '***' + process.env.SMTP_TO_EMAIL.slice(-10) : 'undefined');
+    console.log('SMTP_HOST:', process.env.SMTP_HOST || 'undefined');
     console.log('WHATSAPP_PROVIDER:', process.env.WHATSAPP_PROVIDER || 'undefined');
     console.log('MAYTAPI_TOKEN:', process.env.MAYTAPI_TOKEN ? '***' + process.env.MAYTAPI_TOKEN.slice(-8) : 'undefined');
     console.log('=====================================');

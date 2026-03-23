@@ -30,8 +30,10 @@ export default function TranscriptionPage({ analysis }: { analysis?: any }) {
       email = prompt('Enter your email address:') || '';
       if (!email) return;
     } else if (action === 'whatsapp') {
-      whatsapp = prompt('Enter your WhatsApp number:') || '';
+      whatsapp = prompt('Enter your WhatsApp number (without country code):') || '';
       if (!whatsapp) return;
+      // Automatically add +91 country code for India
+      whatsapp = '+91' + whatsapp.replace(/\D/g, ''); // Remove non-digits and add +91
     }
 
     try {
