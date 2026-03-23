@@ -2,9 +2,11 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { Menu, X } from 'lucide-react';
 
 export default function Sidebar() {
   const [user, setUser] = useState<{ name: string; email: string; role: string } | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -28,100 +30,122 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-72 bg-gradient-to-b from-slate-50 to-white border-r border-slate-200/80 text-slate-700 p-6 flex flex-col h-screen sticky top-0 shadow-sm">
-      {/* Logo Section with Gradient */}
-      <div className="mb-10 flex items-center gap-3">
-        <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg transform hover:scale-105 transition-transform">
-          N
-        </div>
-        <div>
-          <h2 className="text-xl font-extrabold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent tracking-tight">
-            NurseNotes
-          </h2>
-          <p className="text-xs font-semibold text-primary-600 uppercase tracking-wider">AI Intelligence</p>
-        </div>
-      </div>
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border border-slate-200"
+      >
+        {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </button>
 
-      {/* Navigation */}
-      <nav className="flex-1">
-        <ul className="space-y-2 text-sm font-medium">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-300 ${
-                    isActive
-                      ? 'bg-gradient-to-r from-primary-500 to-secondary-600 text-white shadow-lg shadow-primary-500/30'
-                      : 'hover:bg-white hover:shadow-md hover:text-primary-600'
-                  }`}
-                >
-                  {/* Active Indicator */}
-                  {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"></div>
-                  )}
+      {/* Mobile Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
 
-                  <svg
-                    className={`w-5 h-5 transition-transform duration-300 ${
-                      isActive ? '' : 'group-hover:scale-110'
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
-                  </svg>
-                  <span className="font-semibold">{item.label}</span>
-
-                  {/* Hover Glow Effect */}
-                  {!isActive && (
-                    <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-primary-500/5 to-secondary-500/5 transition-opacity duration-300"></div>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      {/* User Section with Glassmorphism */}
-      <div className="mt-6 border-t border-slate-200 pt-6 text-sm">
-        {user ? (
-          <div className="flex items-center justify-between glassmorphism p-4 rounded-xl border border-white/50 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500 text-white flex items-center justify-center font-bold shadow-md">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p className="font-bold text-slate-900 text-sm">{user.name}</p>
-                <p className="text-slate-500 text-[11px] uppercase tracking-wide font-semibold">{user.role}</p>
-              </div>
+      {/* Sidebar */}
+      <div className={`fixed lg:sticky top-0 h-screen lg:h-auto z-40 transform transition-transform duration-300 lg:transform-none ${
+        mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        <div className="w-64 lg:w-72 bg-gradient-to-b from-slate-50 to-white border-r border-slate-200/80 text-slate-700 p-4 lg:p-6 flex flex-col h-screen shadow-sm overflow-y-auto">
+          {/* Logo Section */}
+          <div className="mb-6 lg:mb-10 flex items-center gap-3">
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-primary-500 to-secondary-600 rounded-xl flex items-center justify-center text-white font-bold text-lg lg:text-xl shadow-lg">
+              N
             </div>
-            <a
-              href="/api/auth/logout"
-              className="text-slate-400 hover:text-danger-500 transition-colors hover:scale-110 transform"
-              title="Logout"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-            </a>
+            <div>
+              <h2 className="text-lg lg:text-xl font-extrabold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent tracking-tight">
+                NurseNotes
+              </h2>
+              <p className="text-[10px] lg:text-xs font-semibold text-primary-600 uppercase tracking-wider">AI Intelligence</p>
+            </div>
           </div>
-        ) : (
-          <a
-            href="/api/auth/login"
-            className="flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-primary-500/30 transition-all hover:scale-105 transform"
-          >
-            Login / Sign up
-          </a>
-        )}
+
+          {/* Navigation */}
+          <nav className="flex-1">
+            <ul className="space-y-1 lg:space-y-2 text-sm font-medium">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`group relative flex items-center gap-3 rounded-xl px-3 lg:px-4 py-2 lg:py-3 transition-all duration-300 ${
+                        isActive
+                          ? 'bg-gradient-to-r from-primary-500 to-secondary-600 text-white shadow-lg shadow-primary-500/30'
+                          : 'hover:bg-white hover:shadow-md hover:text-primary-600'
+                      }`}
+                    >
+                      {isActive && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 lg:h-8 bg-white rounded-r-full"></div>
+                      )}
+
+                      <svg
+                        className={`w-4 h-4 lg:w-5 lg:h-5 transition-transform duration-300 ${
+                          isActive ? '' : 'group-hover:scale-110'
+                        }`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={item.icon} />
+                      </svg>
+                      <span className="font-semibold text-xs lg:text-sm">{item.label}</span>
+
+                      {!isActive && (
+                        <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-primary-500/5 to-secondary-500/5 transition-opacity duration-300"></div>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* User Section */}
+          <div className="mt-4 lg:mt-6 border-t border-slate-200 pt-4 lg:pt-6 text-sm">
+            {user ? (
+              <div className="flex items-center justify-between p-3 lg:p-4 rounded-xl border border-white/50 shadow-lg">
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500 text-white flex items-center justify-center font-bold text-sm lg:text-base shadow-md">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900 text-xs lg:text-sm">{user.name}</p>
+                    <p className="text-slate-500 text-[10px] lg:text-[11px] uppercase tracking-wide font-semibold">{user.role}</p>
+                  </div>
+                </div>
+                <a
+                  href="/api/auth/logout"
+                  className="text-slate-400 hover:text-danger-500 transition-colors hover:scale-110 transform"
+                  title="Logout"
+                >
+                  <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                </a>
+              </div>
+            ) : (
+              <a
+                href="/api/auth/login"
+                className="flex items-center justify-center gap-2 w-full py-2 lg:py-3 bg-gradient-to-r from-primary-500 to-secondary-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-primary-500/30 transition-all text-xs lg:text-sm"
+              >
+                Login / Sign up
+              </a>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
