@@ -3,7 +3,6 @@ import { resolve4 } from 'node:dns/promises';
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
 import { Mistral } from '@mistralai/mistralai';
-import { Resend } from 'resend';
 import nodemailer from 'nodemailer';
 import twilio from 'twilio';
 import { config } from '../../../lib/config'; // Import the centralized config
@@ -56,6 +55,7 @@ function isNetworkEmailError(error: any) {
 }
 
 async function sendMailWithFallback(mailOptions: nodemailer.SendMailOptions) {
+  console.log("Sending email to:", mailOptions.to);
   const primaryTransporter = createEmailTransporter();
   try {
     await primaryTransporter.sendMail(mailOptions);
@@ -258,10 +258,9 @@ async function sendEmail(to: string, analysis: any) {
     console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***' + process.env.EMAIL_PASS.slice(-4) : 'undefined');
     console.log('EMAIL_HOST:', process.env.EMAIL_HOST || 'undefined');
     
-    const hasResend = !!process.env.RESEND_API_KEY;
     const hasSmtp = !!process.env.EMAIL_USER && !!process.env.EMAIL_PASS;
-    if (!hasResend && !hasSmtp) {
-      console.error('Neither Resend nor SMTP email credentials are configured');
+    if (!hasSmtp) {
+      console.error('SMTP email credentials are not configured');
       throw new Error('Email service not configured');
     }
 
@@ -287,25 +286,10 @@ async function sendEmail(to: string, analysis: any) {
       });
     }
 
-    const from = process.env.EMAIL_FROM || '"NurseNotes" <noreply@nursenotes.com>';
-    const subject = 'Your Lecture Analysis';
-
-    if (hasResend) {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
-        from,
-        to,
-        subject,
-        html,
-      });
-      console.log('Email sent successfully via Resend to:', to);
-      return;
-    }
-
     await sendMailWithFallback({
       from: process.env.EMAIL_FROM || '"NurseNotes" <noreply@nursenotes.com>',
       to,
-      subject,
+      subject: 'Your Lecture Analysis',
       html,
     });
     console.log('Email sent successfully to:', to);
