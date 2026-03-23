@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolve4 } from 'node:dns/promises';
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
 import { Mistral } from '@mistralai/mistralai';
-import nodemailer from 'nodemailer';
+import formData from 'form-data';
+import Mailgun from 'mailgun.js';
 import twilio from 'twilio';
 import { config } from '../../../lib/config'; // Import the centralized config
 
@@ -23,107 +23,52 @@ const gemini = new GoogleGenAI({
 // Remove hardcoded instance here. We will instantiate it inside getCompletion
 // to ensure it picks up the latest env var correctly if the server just restarted.
 
-function createEmailTransporter() {
-  // Gmail app passwords are often pasted with spaces; normalize to avoid auth failures.
-  const rawPass = process.env.SMTP_TO_PASSWORD || '';
-  const normalizedPass = rawPass.replace(/\s+/g, '');
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: parseInt(process.env.SMTP_PORT || '465'),
-    secure: process.env.SMTP_SECURE === 'true' || true, // use TLS for port 465
-    connectionTimeout: 20000,
-    greetingTimeout: 20000,
-    socketTimeout: 30000,
-    auth: {
-      user: process.env.SMTP_TO_EMAIL,
-      pass: normalizedPass,
-    },
+// Initialize Mailgun
+const mailgun = new Mailgun(formData);
+let mgClient: any = null;
+
+if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {
+  mgClient = mailgun.client({
+    username: 'api',
+    key: process.env.MAILGUN_API_KEY,
   });
 }
 
-function isNetworkEmailError(error: any) {
-  const code = error?.code;
-  return (
-    code === 'ETIMEDOUT' ||
-    code === 'ESOCKET' ||
-    code === 'ECONNECTION' ||
-    code === 'ENETUNREACH' ||
-    code === 'EHOSTUNREACH' ||
-    code === 'ECONNREFUSED' ||
-    error?.command === 'CONN'
-  );
+function createEmailTransporter() {
+  // This function is no longer needed since we only use Mailgun
+  return null;
 }
 
-async function sendMailWithFallback(mailOptions: nodemailer.SendMailOptions) {
+async function sendMailWithFallback(mailOptions: any) {
   console.log("Sending email to:", mailOptions.to);
-  const primaryTransporter = createEmailTransporter();
+  
+  // Only use Mailgun
+  if (!mgClient) {
+    throw new Error('Mailgun not configured');
+  }
+  
   try {
-    await primaryTransporter.sendMail(mailOptions);
+    const toEmail = Array.isArray(mailOptions.to) ? mailOptions.to[0] : mailOptions.to;
+    const fromEmail = process.env.MAILGUN_FROM_EMAIL;
+    
+    if (!toEmail || !fromEmail) {
+      throw new Error('Missing required email addresses');
+    }
+    
+    const msg = {
+      to: typeof toEmail === 'string' ? toEmail : String(toEmail),
+      from: fromEmail,
+      subject: mailOptions.subject || '',
+      text: typeof mailOptions.text === 'string' ? mailOptions.text : String(mailOptions.text || ''),
+      html: typeof mailOptions.html === 'string' ? mailOptions.html : String(mailOptions.html || ''),
+    };
+    
+    await mgClient.messages.create(process.env.MAILGUN_DOMAIN!, msg);
+    console.log('Email sent via Mailgun');
     return;
   } catch (error: any) {
-    const isGmail = (process.env.EMAIL_HOST || '').includes('gmail');
-    const configuredPort = parseInt(process.env.EMAIL_PORT || '587');
-    const shouldRetryWith465 =
-      isGmail &&
-      configuredPort !== 465 &&
-      isNetworkEmailError(error);
-
-    if (!shouldRetryWith465) {
-      if (!isGmail || !isNetworkEmailError(error)) {
-        throw error;
-      }
-    }
-
-    // Some environments have trouble reaching smtp.gmail.com over IPv6.
-    // Retry with IPv4 addresses and explicit TLS servername.
-    const rawPass = process.env.SMTP_TO_PASSWORD || '';
-    const normalizedPass = rawPass.replace(/\s+/g, '');
-    const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-    const ipv4Addrs = await resolve4(host);
-
-    let lastError: any = error;
-    for (const ip of ipv4Addrs) {
-      try {
-        const fallback465 = nodemailer.createTransport({
-          host: ip,
-          port: 465,
-          secure: true,
-          connectionTimeout: 20000,
-          greetingTimeout: 20000,
-          socketTimeout: 30000,
-          tls: { servername: host },
-          auth: {
-            user: process.env.SMTP_TO_EMAIL,
-            pass: normalizedPass,
-          },
-        });
-        await fallback465.sendMail(mailOptions);
-        return;
-      } catch (e465: any) {
-        lastError = e465;
-        try {
-          const fallback587 = nodemailer.createTransport({
-            host: ip,
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            connectionTimeout: 20000,
-            greetingTimeout: 20000,
-            socketTimeout: 30000,
-            tls: { servername: host },
-            auth: {
-              user: process.env.SMTP_TO_EMAIL,
-              pass: normalizedPass,
-            },
-          });
-          await fallback587.sendMail(mailOptions);
-          return;
-        } catch (e587: any) {
-          lastError = e587;
-        }
-      }
-    }
-    throw lastError;
+    console.error('Mailgun failed:', error);
+    throw error;
   }
 }
 
@@ -254,13 +199,14 @@ async function sendEmail(to: string, analysis: any) {
   try {
     // Debug: Log environment variables (without sensitive data)
     console.log('Email configuration check:');
-    console.log('SMTP_TO_EMAIL:', process.env.SMTP_TO_EMAIL ? '***' + process.env.SMTP_TO_EMAIL.slice(-10) : 'undefined');
-    console.log('SMTP_TO_PASSWORD:', process.env.SMTP_TO_PASSWORD ? '***' + process.env.SMTP_TO_PASSWORD.slice(-4) : 'undefined');
-    console.log('SMTP_HOST:', process.env.SMTP_HOST || 'undefined');
+    console.log('Mailgun API Key:', process.env.MAILGUN_API_KEY ? '***' + process.env.MAILGUN_API_KEY.slice(-4) : 'undefined');
+    console.log('Mailgun Domain:', process.env.MAILGUN_DOMAIN || 'undefined');
+    console.log('Mailgun From Email:', process.env.MAILGUN_FROM_EMAIL || 'undefined');
     
-    const hasSmtp = !!process.env.SMTP_TO_EMAIL && !!process.env.SMTP_TO_PASSWORD;
-    if (!hasSmtp) {
-      console.error('SMTP email credentials are not configured');
+    const hasMailgun = !!process.env.MAILGUN_API_KEY && !!process.env.MAILGUN_DOMAIN;
+    
+    if (!hasMailgun) {
+      console.error('Mailgun not configured');
       throw new Error('Email service not configured');
     }
 
@@ -449,8 +395,8 @@ export async function POST(req: NextRequest) {
   try {
     // Debug: Log environment variables (without sensitive data)
     console.log('=== Production Environment Check ===');
-    console.log('SMTP_TO_EMAIL:', process.env.SMTP_TO_EMAIL ? '***' + process.env.SMTP_TO_EMAIL.slice(-10) : 'undefined');
-    console.log('SMTP_HOST:', process.env.SMTP_HOST || 'undefined');
+    console.log('Mailgun API Key:', process.env.MAILGUN_API_KEY ? '***' + process.env.MAILGUN_API_KEY.slice(-4) : 'undefined');
+    console.log('Mailgun Domain:', process.env.MAILGUN_DOMAIN || 'undefined');
     console.log('WHATSAPP_PROVIDER:', process.env.WHATSAPP_PROVIDER || 'undefined');
     console.log('MAYTAPI_TOKEN:', process.env.MAYTAPI_TOKEN ? '***' + process.env.MAYTAPI_TOKEN.slice(-8) : 'undefined');
     console.log('=====================================');
