@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { GoogleGenAI } from '@google/genai';
 import { Mistral } from '@mistralai/mistralai';
-import formData from 'form-data';
-import Mailgun from 'mailgun.js';
 import twilio from 'twilio';
 import { config } from '../../../lib/config'; // Import the centralized config
 
@@ -20,58 +18,6 @@ const gemini = new GoogleGenAI({
   apiKey: config.geminiApiKey || 'YOUR_GEMINI_API_KEY',
 });
 
-// Remove hardcoded instance here. We will instantiate it inside getCompletion
-// to ensure it picks up the latest env var correctly if the server just restarted.
-
-// Initialize Mailgun
-const mailgun = new Mailgun(formData);
-let mgClient: any = null;
-
-if (process.env.MAILGUN_API_KEY && process.env.MAILGUN_DOMAIN) {
-  mgClient = mailgun.client({
-    username: 'api',
-    key: process.env.MAILGUN_API_KEY,
-  });
-}
-
-function createEmailTransporter() {
-  // This function is no longer needed since we only use Mailgun
-  return null;
-}
-
-async function sendMailWithFallback(mailOptions: any) {
-  console.log("Sending email to:", mailOptions.to);
-  
-  // Only use Mailgun
-  if (!mgClient) {
-    throw new Error('Mailgun not configured');
-  }
-  
-  try {
-    const toEmail = Array.isArray(mailOptions.to) ? mailOptions.to[0] : mailOptions.to;
-    const fromEmail = process.env.MAILGUN_FROM_EMAIL;
-    
-    if (!toEmail || !fromEmail) {
-      throw new Error('Missing required email addresses');
-    }
-    
-    const msg = {
-      to: typeof toEmail === 'string' ? toEmail : String(toEmail),
-      from: fromEmail,
-      subject: mailOptions.subject || '',
-      text: typeof mailOptions.text === 'string' ? mailOptions.text : String(mailOptions.text || ''),
-      html: typeof mailOptions.html === 'string' ? mailOptions.html : String(mailOptions.html || ''),
-    };
-    
-    await mgClient.messages.create(process.env.MAILGUN_DOMAIN!, msg);
-    console.log('Email sent via Mailgun');
-    return;
-  } catch (error: any) {
-    console.error('Mailgun failed:', error);
-    throw error;
-  }
-}
-
 // Configure your Twilio client
 // IMPORTANT: Replace with your actual Twilio credentials
 const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN) : null;
@@ -81,6 +27,64 @@ const SMS_PROVIDER = process.env.SMS_PROVIDER || 'twilio'; // 'twilio', 'textbel
 
 // Configure WhatsApp provider
 const WHATSAPP_PROVIDER = process.env.WHATSAPP_PROVIDER || 'twilio'; // 'twilio', 'maytapi'
+
+async function sendMailWithFallback(mailOptions: any) {
+  console.log("Sending email to:", mailOptions.to);
+  
+  // Use Brevo directly via HTTP API
+  const apiKey = process.env.BREVO_API_KEY;
+  const fromEmail = process.env.BREVO_FROM_EMAIL;
+  
+  if (!apiKey || !fromEmail) {
+    throw new Error('Brevo not configured');
+  }
+  
+  try {
+    const toEmail = Array.isArray(mailOptions.to) ? mailOptions.to[0] : mailOptions.to;
+    
+    if (!toEmail) {
+      throw new Error('Missing recipient email address');
+    }
+    
+    const textContent = typeof mailOptions.text === 'string' ? mailOptions.text : String(mailOptions.text || '');
+    const htmlContent = typeof mailOptions.html === 'string' ? mailOptions.html : String(mailOptions.html || '');
+    
+    // Ensure at least one content type is non-empty
+    if (!textContent && !htmlContent) {
+      throw new Error('Email must have either text or HTML content');
+    }
+    
+    const sendSmtpEmail = {
+      sender: { email: fromEmail },
+      to: [{ email: typeof toEmail === 'string' ? toEmail : String(toEmail) }],
+      subject: mailOptions.subject || '',
+      ...(textContent && { textContent }),
+      ...(htmlContent && { htmlContent }),
+    };
+    
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'content-type': 'application/json',
+        'api-key': apiKey,
+      },
+      body: JSON.stringify(sendSmtpEmail),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.text();
+      throw new Error(`Brevo API error: ${response.status} ${response.statusText} - ${errorData}`);
+    }
+    
+    const result = await response.json();
+    console.log('Email sent via Brevo:', result);
+    return;
+  } catch (error: any) {
+    console.error('Brevo failed:', error);
+    throw error;
+  }
+}
 
 async function getCompletion(prompt: string, provider: 'gemini' | 'openai' | 'mistral' = 'gemini') {
   try {
@@ -199,14 +203,13 @@ async function sendEmail(to: string, analysis: any) {
   try {
     // Debug: Log environment variables (without sensitive data)
     console.log('Email configuration check:');
-    console.log('Mailgun API Key:', process.env.MAILGUN_API_KEY ? '***' + process.env.MAILGUN_API_KEY.slice(-4) : 'undefined');
-    console.log('Mailgun Domain:', process.env.MAILGUN_DOMAIN || 'undefined');
-    console.log('Mailgun From Email:', process.env.MAILGUN_FROM_EMAIL || 'undefined');
+    console.log('Brevo API Key:', process.env.BREVO_API_KEY ? '***' + process.env.BREVO_API_KEY.slice(-4) : 'undefined');
+    console.log('Brevo From Email:', process.env.BREVO_FROM_EMAIL || 'undefined');
     
-    const hasMailgun = !!process.env.MAILGUN_API_KEY && !!process.env.MAILGUN_DOMAIN;
+    const hasBrevo = !!process.env.BREVO_API_KEY;
     
-    if (!hasMailgun) {
-      console.error('Mailgun not configured');
+    if (!hasBrevo) {
+      console.error('Brevo not configured');
       throw new Error('Email service not configured');
     }
 
@@ -395,8 +398,7 @@ export async function POST(req: NextRequest) {
   try {
     // Debug: Log environment variables (without sensitive data)
     console.log('=== Production Environment Check ===');
-    console.log('Mailgun API Key:', process.env.MAILGUN_API_KEY ? '***' + process.env.MAILGUN_API_KEY.slice(-4) : 'undefined');
-    console.log('Mailgun Domain:', process.env.MAILGUN_DOMAIN || 'undefined');
+    console.log('Brevo API Key:', process.env.BREVO_API_KEY ? '***' + process.env.BREVO_API_KEY.slice(-4) : 'undefined');
     console.log('WHATSAPP_PROVIDER:', process.env.WHATSAPP_PROVIDER || 'undefined');
     console.log('MAYTAPI_TOKEN:', process.env.MAYTAPI_TOKEN ? '***' + process.env.MAYTAPI_TOKEN.slice(-8) : 'undefined');
     console.log('=====================================');
